@@ -76,8 +76,7 @@ def error_file((et, ev, tb)):
     """
     Process the given traceback to find the file where the error occurred
     """
-    filename = ev.filename
-    if filename not in _error_files:
+    if ev.filename not in _error_files:
         _error_files.append(ev.filename)
 
 def reloader_thread():
