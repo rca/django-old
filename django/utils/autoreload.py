@@ -72,12 +72,18 @@ def code_changed():
             return True
     return False
 
-def error_file((et, ev, tb)):
-    """
-    Process the given traceback to find the file where the error occurred
-    """
-    if ev.filename not in _error_files:
-        _error_files.append(ev.filename)
+def check_errors(fn):
+    def wrapper(*args, **kwargs):
+        try:
+            fn(*args, **kwargs)
+        except (IndentationError, SyntaxError), msg:
+            et, ev, tb = sys.exc_info()
+            if ev.filename not in _error_files:
+                _error_files.append(ev.filename)
+
+            raise
+
+    return wrapper
 
 def reloader_thread():
     while RUN_RELOADER:
@@ -127,5 +133,7 @@ def main(main_func, args=None, kwargs=None):
         reloader = jython_reloader
     else:
         reloader = python_reloader
-    reloader(main_func, args, kwargs)
+
+    wrapped_main_func = check_errors(main_func)
+    reloader(wrapped_main_func, args, kwargs)
 
