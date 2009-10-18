@@ -48,9 +48,11 @@ RUN_RELOADER = True
 _mtimes = {}
 _win = (sys.platform == "win32")
 
+_error_files = []
+
 def code_changed():
     global _mtimes, _win
-    for filename in filter(lambda v: v, map(lambda m: getattr(m, "__file__", None), sys.modules.values())):
+    for filename in filter(lambda v: v, map(lambda m: getattr(m, "__file__", None), sys.modules.values())) + _error_files:
         if filename.endswith(".pyc") or filename.endswith(".pyo"):
             filename = filename[:-1]
         if not os.path.exists(filename):
@@ -64,8 +66,19 @@ def code_changed():
             continue
         if mtime != _mtimes[filename]:
             _mtimes = {}
+            try:
+                del _error_files[_error_files.index(filename)]
+            except ValueError: pass
             return True
     return False
+
+def error_file((et, ev, tb)):
+    """
+    Process the given traceback to find the file where the error occurred
+    """
+    filename = ev.filename
+    if filename not in _error_files:
+        _error_files.append(ev.filename)
 
 def reloader_thread():
     while RUN_RELOADER:
