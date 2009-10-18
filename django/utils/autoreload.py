@@ -76,7 +76,7 @@ def check_errors(fn):
     def wrapper(*args, **kwargs):
         try:
             fn(*args, **kwargs)
-        except (IndentationError, SyntaxError), msg:
+        except (IndentationError, NameError, SyntaxError), msg:
             et, ev, tb = sys.exc_info()
             if ev.filename not in _error_files:
                 _error_files.append(ev.filename)
