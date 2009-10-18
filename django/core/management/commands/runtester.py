@@ -66,10 +66,6 @@ class Command(BaseCommand):
 
                 test_command = get_test_command()
                 test_command.handle(*args, **options)
-            except (IndentationError, SyntaxError), msg:
-                exc_info = sys.exc_info()
-                traceback.print_exc()
-                autoreload.error_file(exc_info)
             finally:
                 if os.path.exists(INPROGRESS_FILE):
                     os.remove(INPROGRESS_FILE)
