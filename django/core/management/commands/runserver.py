@@ -45,7 +45,14 @@ class Command(BaseCommand):
             from django.conf import settings
             from django.utils import translation
             print "Validating models..."
-            self.validate(display_num_errors=True)
+            try:
+                self.validate(display_num_errors=True)
+            except (IndentationError, SyntaxError), msg:
+                if use_reloader:
+                    from django.utils import autoreload
+                    exc_info = sys.exc_info()
+                    autoreload.error_file(exc_info)
+                raise
             print "\nDjango version %s, using settings %r" % (django.get_version(), settings.SETTINGS_MODULE)
             print "Development server is running at http://%s:%s/" % (addr, port)
             print "Quit the server with %s." % quit_command
